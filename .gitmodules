@@ -1,0 +1,4 @@
+[submodule "subprojects/Clara"]
+	path = subprojects/Clara
+	url = https://github.com/catchorg/Clara
+	branch = master

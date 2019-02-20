@@ -1,13 +1,13 @@
 #include <boost/algorithm/string.hpp>
-#include <boost/program_options.hpp>
+#include <clara.hpp>
 #include <filesystem>
 #include <iostream>
 
 namespace fs = std::filesystem;
-namespace po = boost::program_options;
 
 std::string binaryName;
-po::variables_map vm;
+bool recursive = false;
+bool force = false;
 int exitcode = 0;
 
 void remove(const std::string& filename, fs::path path) {
@@ -16,7 +16,7 @@ void remove(const std::string& filename, fs::path path) {
 		exitcode = 1;
 	};
 	if (fs::is_directory(path)) {
-		if (vm.count("recursive") > 0) {
+		if (recursive) {
 			for (auto& child : fs::directory_iterator(path)) {
 				remove(fs::relative(child.path()).string(), child.path());
 			}
@@ -25,7 +25,7 @@ void remove(const std::string& filename, fs::path path) {
 			return;
 		}
 	}
-	if ((fs::status(path).permissions() & fs::perms::owner_write) == fs::perms::none) {
+	if (!force and (fs::status(path).permissions() & fs::perms::owner_write) == fs::perms::none) {
 		std::cout << binaryName << ": remove write-protected file '" << filename << "'? ";
 		std::string input;
 		std::getline(std::cin, input);
@@ -43,38 +43,32 @@ int main(int argc, char** argv) {
 	binaryName = fs::path(argv[0]).filename().string();
 
 	std::vector<std::string> files;
+	bool help = false;
+	bool version = false;
+	auto cli =
+	    clara::Parser() |
+	    clara::Opt(force)["-f"]["--force"]("ignore nonexistent files and arguments, never prompt") |
+	    clara::Opt(recursive)["-r"]["-R"]["--recursive"](
+	        "remove directories and their contents recursively") |
+	    clara::Opt(help)["-h"]["--help"]("display this help and exit") |
+	    clara::Opt(version)["--version"]("output version information and exit") |
+	    clara::Arg(files, "");
 
-	po::options_description desc("Options");
-	desc.add_options()("recursive,r", "remove directories and their contents recursively")(
-	    "help", "display this help and exit")("version", "output version information and exit");
-
-	po::options_description hidden("Hidden options");
-	hidden.add_options()("files", po::value(&files));
-
-	po::options_description options;
-	options.add(desc).add(hidden);
-
-	po::positional_options_description positional_desc;
-	positional_desc.add("files", -1);
-
-	try {
-		po::store(
-		    po::command_line_parser(argc, argv).options(options).positional(positional_desc).run(),
-		    vm);
-	} catch (boost::program_options::unknown_option& e) {
-		std::cerr << binaryName << ": " << e.what() << "\nTry '" << binaryName
+	const auto result = cli.parse(clara::Args(argc, argv));
+	if (!result) {
+		std::cerr << binaryName << ": " << result.errorMessage() << "\nTry '" << binaryName
 		          << " --help' for more information.\n";
 		return 1;
 	}
-	po::notify(vm);
 
-	if (vm.count("help") > 0) {
+	if (help) {
+		cli.parse(clara::Args{""}); // empty exeName so that Clara doesn't print usage information
 		std::cout << "Usage: " << binaryName
 		          << " [OPTION]... [FILE]...\nRemove (unlink) the FILE(s).\n\n"
-		          << desc << "\n";
+		          << cli << "\n";
 		return 0;
 	}
-	if (vm.count("version") > 0) {
+	if (version) {
 		std::cout << binaryName
 		          << " 0.1\nCopyright © 2018 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
 		             "or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you "
@@ -84,7 +78,7 @@ int main(int argc, char** argv) {
 	}
 	for (const std::string& filename : files) {
 		try {
-			if (vm.count("recursive") > 0 and vm.count("force") > 0) {
+			if (recursive and force) {
 				fs::remove_all(fs::path(filename));
 			} else {
 				remove(filename, fs::path(filename));
