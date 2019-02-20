@@ -1,7 +1,7 @@
-#include <boost/algorithm/string.hpp>
 #include <clara.hpp>
 #include <filesystem>
 #include <iostream>
+#include <string>
 
 namespace fs = std::filesystem;
 
@@ -13,8 +13,9 @@ int exitcode = 0;
 bool askYes() {
 	std::string input;
 	std::getline(std::cin, input);
-	boost::algorithm::to_lower(input);
-	return input == "y" or input == "yes";
+	std::transform(input.begin(), input.end(), input.begin(),
+	               [](unsigned char c) { return std::tolower(c); });
+	return input == "y" || input == "yes";
 }
 
 void remove(const std::string& filename, fs::path path) {
@@ -32,7 +33,7 @@ void remove(const std::string& filename, fs::path path) {
 			return;
 		}
 	}
-	if (!force and (fs::status(path).permissions() & fs::perms::owner_write) == fs::perms::none) {
+	if (!force && (fs::status(path).permissions() & fs::perms::owner_write) == fs::perms::none) {
 		std::cout << binaryName << ": remove write-protected file '" << filename << "'? ";
 		if (!askYes()) {
 			return;
@@ -130,7 +131,7 @@ int main(int argc, char** argv) {
 			}
 		}
 		const size_t numberOfFiles = files.size() - numberOfFolders;
-		if (numberOfFiles > 1 and numberOfFolders > 1) {
+		if (numberOfFiles > 1 && numberOfFolders > 1) {
 			std::cout << "Delete " << numberOfFolders << " folders and " << numberOfFiles
 			          << " files? ";
 			if (!askYes()) {
@@ -169,7 +170,7 @@ int main(int argc, char** argv) {
 					}
 				}
 			}
-			if (recursive and force) {
+			if (recursive && force) {
 				fs::remove_all(path);
 			} else {
 				remove(filename, path);
