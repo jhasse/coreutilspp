@@ -39,7 +39,7 @@ void remove(const std::string& filename, fs::path path) {
 			return;
 		}
 	}
-	if (!fs::remove(path)) {
+	if (!fs::remove(path) && !force) {
 		error("No such file or directory");
 	}
 }
@@ -176,8 +176,13 @@ int main(int argc, char** argv) {
 				remove(filename, path);
 			}
 		} catch (fs::filesystem_error& err) {
-			std::cerr << binaryName << ": cannot remove '" << err.path1().string()
-			          << "': " << err.code().message() << std::endl;
+			const auto code = err.code();
+			// --force should ignore non-existant files
+			if (code.value() != 2 /* No such file or directory */ || !force) {
+				std::cerr << binaryName << ": cannot remove '" << err.path1().string()
+				          << "': " << code.message() << std::endl;
+				exitcode = 1;
+			}
 		}
 	}
 	return exitcode;
