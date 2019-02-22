@@ -1,3 +1,5 @@
+#include "system.hpp"
+
 #include <clara.hpp>
 #include <filesystem>
 #include <iostream>
@@ -33,7 +35,8 @@ void remove(const std::string& filename, fs::path path) {
 			return;
 		}
 	}
-	if (!force && (fs::status(path).permissions() & fs::perms::owner_write) == fs::perms::none) {
+	if (!force && mayPrompt() &&
+	    (fs::status(path).permissions() & fs::perms::owner_write) == fs::perms::none) {
 		std::cout << binaryName << ": remove write-protected file '" << filename << "'? ";
 		if (!askYes()) {
 			return;
@@ -98,7 +101,7 @@ int main(int argc, char** argv) {
 	}
 	if (version) {
 		std::cout << binaryName
-		          << " 0.1\nCopyright © 2018 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
+		          << " 0.1\nCopyright © 2019 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
 		             "or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you "
 		             "are free to change and redistribute it.\nThere is NO WARRANTY, to the extent "
 		             "permitted by law.\n";
@@ -123,7 +126,7 @@ int main(int argc, char** argv) {
 
 	// Warn when we're getting passed 2 folders and 2 files or more. This helps to prevent an
 	// accidental `rm++ -rf *` in big directories.
-	if (files.size() > 3) {
+	if (mayPrompt() && files.size() > 3) {
 		size_t numberOfFolders = 0;
 		for (const auto filename : files) {
 			if (fs::is_directory(filename)) {
@@ -146,27 +149,43 @@ int main(int argc, char** argv) {
 			if (recursive) {
 				const auto canonicalPath = fs::canonical(path);
 				if (canonicalPath == home) {
-					std::cout << "You're trying to delete your home directory. Continue? ";
-					if (!askYes()) {
+					std::cout << "You're trying to delete your home directory. ";
+					if (mayPrompt()) {
+						std::cout << "Continue? ";
+						if (!askYes()) {
+							continue;
+						}
+					} else {
+						std::cout << "Skipping.\n";
+						exitcode = 1;
 						continue;
 					}
 				} else if (pathContainsFile(canonicalPath, home)) {
-					std::cout << "You're trying to delete a path which is above your home "
-					             "directory. Continue? ";
-					if (!askYes()) {
-						continue;
-					}
-				} else if (canonicalPath == cwd) {
 					std::cout
-					    << "You're trying to delete your current working directory. Continue? ";
-					if (!askYes()) {
+					    << "You're trying to delete a path which is above your home directory. ";
+					if (mayPrompt()) {
+						std::cout << "Continue? ";
+						if (!askYes()) {
+							continue;
+						}
+					} else {
+						std::cout << "Skipping.\n";
+						exitcode = 1;
 						continue;
 					}
-				} else if (pathContainsFile(canonicalPath, cwd)) {
-					std::cout << "You're trying to delete a path which is above your current "
-					             "working directory. Continue? ";
-					if (!askYes()) {
-						continue;
+				} else if (mayPrompt()) {
+					if (canonicalPath == cwd) {
+						std::cout
+						    << "You're trying to delete your current working directory. Continue? ";
+						if (!askYes()) {
+							continue;
+						}
+					} else if (pathContainsFile(canonicalPath, cwd)) {
+						std::cout << "You're trying to delete a path which is above your current "
+						             "working directory. Continue? ";
+						if (!askYes()) {
+							continue;
+						}
 					}
 				}
 			}
