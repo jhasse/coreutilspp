@@ -71,6 +71,11 @@ bool pathContainsFile(fs::path dir, fs::path file) {
 }
 
 int main(int argc, char** argv) {
+	if (argc == 1) {
+		std::cerr << argv[0] << ": missing operand\nTry '" << argv[0]
+		          << " --help' for more information.\n";
+		return 1;
+	}
 	binaryName = fs::path(argv[0]).filename().string();
 
 	std::vector<std::string> files;
