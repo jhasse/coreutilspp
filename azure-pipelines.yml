@@ -1,0 +1,28 @@
+trigger:
+- master
+
+jobs:
+  - job: Linux
+    pool:
+      vmImage: Ubuntu-16.04
+    steps:
+    - script: |
+        cmake -H. -Bbuild
+        cmake --build build
+      displayName: Build
+  - job: macOS
+    pool:
+      vmImage: macOS-10.13
+    steps:
+    - script: |
+        cmake -H. -Bbuild
+        cmake --build build
+      displayName: Build
+  - job: Windows
+    pool:
+      vmImage: vs2017-win2016
+    steps:
+    - script: |
+        cmake -H. -Bbuild
+        cmake --build build
+      displayName: Build
