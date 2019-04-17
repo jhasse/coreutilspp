@@ -6,6 +6,8 @@ jobs:
     pool:
       vmImage: Ubuntu-16.04
     steps:
+    - checkout: self
+      submodules: true
     - script: |
         cmake -H. -Bbuild
         cmake --build build
@@ -14,6 +16,8 @@ jobs:
     pool:
       vmImage: macOS-10.13
     steps:
+    - checkout: self
+      submodules: true
     - script: |
         cmake -H. -Bbuild
         cmake --build build
@@ -22,6 +26,8 @@ jobs:
     pool:
       vmImage: vs2017-win2016
     steps:
+    - checkout: self
+      submodules: true
     - script: |
         cmake -H. -Bbuild
         cmake --build build
