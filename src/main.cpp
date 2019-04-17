@@ -25,7 +25,7 @@ void remove(const std::string& filename, fs::path path) {
 		std::cerr << binaryName << ": cannot remove '" << filename << "': " << msg << "\n";
 		exitcode = 1;
 	};
-	if (fs::is_directory(path)) {
+	if (!fs::is_symlink(path) && fs::is_directory(path)) {
 		if (recursive) {
 			for (auto& child : fs::directory_iterator(path)) {
 				remove(fs::relative(child.path()).string(), child.path());
