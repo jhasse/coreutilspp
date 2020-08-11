@@ -1,8 +1,9 @@
 #include "system.hpp"
 
-#include <clara.hpp>
+#include <cassert>
 #include <filesystem>
 #include <iostream>
+#include <lyra/lyra.hpp>
 #include <string>
 
 namespace fs = std::filesystem;
@@ -82,15 +83,15 @@ int main(int argc, char** argv) {
 	bool help = false;
 	bool version = false;
 	auto cli =
-	    clara::Parser() |
-	    clara::Opt(force)["-f"]["--force"]("ignore nonexistent files and arguments, never prompt") |
-	    clara::Opt(recursive)["-r"]["-R"]["--recursive"](
+	    lyra::cli_parser() |
+	    lyra::opt(force)["-f"]["--force"]("ignore nonexistent files and arguments, never prompt") |
+	    lyra::opt(recursive)["-r"]["-R"]["--recursive"](
 	        "remove directories and their contents recursively") |
-	    clara::Opt(help)["-h"]["--help"]("display this help and exit") |
-	    clara::Opt(version)["--version"]("output version information and exit") |
-	    clara::Arg(files, "");
+	    lyra::opt(help)["-h"]["--help"]("display this help and exit") |
+	    lyra::opt(version)["--version"]("output version information and exit") |
+	    lyra::arg(files, "");
 
-	const auto result = cli.parse(clara::Args(argc, argv));
+	const auto result = cli.parse(lyra::args(argc, argv));
 	if (!result) {
 		std::cerr << binaryName << ": " << result.errorMessage() << "\nTry '" << binaryName
 		          << " --help' for more information.\n";
@@ -98,10 +99,10 @@ int main(int argc, char** argv) {
 	}
 
 	if (help) {
-		cli.parse(clara::Args{ "" }); // empty exeName so that Clara doesn't print usage information
+		cli.parse(lyra::args{ "" }); // empty exeName so that Lyra doesn't print usage information
 		std::cout << "Usage: " << binaryName
 		          << " [OPTION]... [FILE]...\nRemove (unlink) the FILE(s).\n\n"
-		          << cli << "\n";
+		          << cli;
 		return 0;
 	}
 	if (version) {

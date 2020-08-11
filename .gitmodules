@@ -1,4 +1,3 @@
-[submodule "subprojects/Clara"]
-	path = subprojects/Clara
-	url = https://github.com/catchorg/Clara
-	branch = master
+[submodule "subprojects/Lyra"]
+	path = subprojects/Lyra
+	url = https://github.com/bfgroup/Lyra

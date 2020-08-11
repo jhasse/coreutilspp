@@ -6,7 +6,7 @@ file(GLOB SRC src/*.cpp)
 add_executable(rm++ ${SRC})
 
 target_compile_features(rm++ PUBLIC cxx_std_17)
-target_include_directories(rm++ PRIVATE subprojects/Clara/include)
+target_include_directories(rm++ PRIVATE subprojects/Lyra/include)
 
 if(NOT MSVC)
 	target_link_libraries(rm++ PRIVATE stdc++fs)
