@@ -116,17 +116,17 @@ int main(int argc, char** argv) {
 	const auto cwd = fs::current_path();
 	fs::path home;
 #ifdef _WIN32
-	if (const auto envHome = std::getenv("USERPROFILE")) {
+	if (const auto envHome = getEnv("USERPROFILE")) {
 #else
-	if (const auto envHome = std::getenv("HOME")) {
+	if (const auto envHome = getEnv("HOME")) {
 #endif
-		home = fs::canonical(envHome);
+		home = fs::canonical(*envHome);
 #ifdef _WIN32
-	} else if (const auto envUser = std::getenv("USERNAME")) {
-		home = fs::path("C:/Users") / fs::path(envUser);
+	} else if (const auto envUser = getEnv("USERNAME")) {
+		home = fs::path("C:/Users") / fs::path(*envUser);
 #else
-	} else if (const auto envUser = std::getenv("USER")) {
-		home = fs::path("/home") / fs::path(envUser);
+	} else if (const auto envUser = getEnv("USER")) {
+		home = fs::path("/home") / fs::path(*envUser);
 #endif
 	}
 
