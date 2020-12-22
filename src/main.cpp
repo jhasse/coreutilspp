@@ -4,7 +4,14 @@
 #include <filesystem>
 #include <iostream>
 #include <lyra/lyra.hpp>
+#include <mutex>
 #include <string>
+#include <thread>
+#include <ThreadPool.hpp>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 namespace fs = std::filesystem;
 
@@ -45,6 +52,88 @@ void remove(const std::string& filename, fs::path path) {
 	}
 	if (!fs::remove(path) && !force) {
 		error("No such file or directory");
+	}
+}
+
+void removeRecursive(fs::path path) {
+	std::atomic_uint64_t deletedFiles = 0;
+	std::atomic_uint64_t filesToDelete = 0;
+
+	std::string error;
+	std::mutex errorMutex;
+
+	std::atomic_bool requestStop = false;
+	std::condition_variable requestStopCV;
+	std::mutex requestStopMutex;
+
+	std::thread uiThread([&]() {
+		while (!requestStop || deletedFiles < filesToDelete) {
+			std::unique_lock cvLock(requestStopMutex);
+			requestStopCV.wait_for(cvLock, std::chrono::milliseconds(10));
+			if (filesToDelete > 0) {
+				std::cout << "\r" << "(" << deletedFiles
+						  << " / " << filesToDelete << ") ... "
+							<< std::flush;
+				if (requestStop) {
+					std::cout << (deletedFiles * 100 / filesToDelete) << "%";
+				}
+			}
+		}
+	});
+
+	{
+		ThreadPool pool(std::thread::hardware_concurrency());
+
+		for (auto& it : fs::recursive_directory_iterator(path)) {
+			if (fs::is_directory(it)) {
+				continue;
+			}
+			if (requestStop) {
+				break;
+			}
+			++filesToDelete;
+			pool.enqueue([it, &deletedFiles, &error, &errorMutex, &requestStop]() {
+				try {
+#ifdef _WIN32
+					const auto path = it.path().wstring();
+					DWORD attributes = GetFileAttributes(path.c_str());
+					if (attributes == INVALID_FILE_ATTRIBUTES &&
+					    GetLastError() == ERROR_FILE_NOT_FOUND) {
+						throw std::exception();
+					}
+					if (attributes & FILE_ATTRIBUTE_READONLY) {
+						// On non-Windows systems remove will happily delete read-only files. On
+						// Windows rm++ should behave the same. See
+						// https://github.com/ninja-build/ninja/issues/1886
+						SetFileAttributes(path.c_str(), attributes & ~FILE_ATTRIBUTE_READONLY);
+					}
+					if (!DeleteFile(path.c_str())) {
+						throw std::exception();
+					}
+#else
+					if (!fs::remove(it)) {
+						throw std::runtime_error("files doesn't exist");
+					}
+#endif
+				} catch (std::exception&) {
+					std::unique_lock lk(errorMutex);
+					error = it.path().string();
+					requestStop = true;
+				}
+				++deletedFiles;
+			});
+		}
+
+		requestStop = true;
+		requestStopCV.notify_all();
+	}
+
+	uiThread.join();
+	if (error.empty()) {
+		fs::remove_all(path); // remove empty directories
+	} else {
+		std::cerr << "\nCouldn't delete " << error << std::endl;
+		exitcode = 1;
 	}
 }
 
@@ -107,7 +196,7 @@ int main(int argc, char** argv) {
 	}
 	if (version) {
 		std::cout << binaryName
-		          << " 0.1\nCopyright © 2019 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
+		          << " 0.2\nCopyright © 2019 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
 		             "or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you "
 		             "are free to change and redistribute it.\nThere is NO WARRANTY, to the extent "
 		             "permitted by law.\n";
@@ -196,7 +285,7 @@ int main(int argc, char** argv) {
 				}
 			}
 			if (recursive && force) {
-				fs::remove_all(path);
+				removeRecursive(path);
 			} else {
 				remove(filename, path);
 			}

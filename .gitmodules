@@ -1,3 +1,6 @@
 [submodule "subprojects/Lyra"]
 	path = subprojects/Lyra
 	url = https://github.com/bfgroup/Lyra
+[submodule "subprojects/ThreadPool"]
+	path = subprojects/ThreadPool
+	url = https://github.com/jhasse/ThreadPool
