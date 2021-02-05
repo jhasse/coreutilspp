@@ -15,6 +15,8 @@
 
 namespace fs = std::filesystem;
 
+void removeRecursive(fs::path path);
+
 std::string binaryName;
 bool recursive = false;
 bool force = false;
@@ -35,9 +37,13 @@ void remove(const std::string& filename, fs::path path) {
 	};
 	if (!fs::is_symlink(path) && fs::is_directory(path)) {
 		if (recursive) {
-			for (auto& child : fs::directory_iterator(path)) {
-				remove(fs::relative(child.path()).string(), child.path());
-			}
+            if (force) {
+				removeRecursive(path);
+            } else {
+                for (auto& child : fs::directory_iterator(path)) {
+                    remove(fs::relative(child.path()).string(), child.path());
+                }
+            }
 		} else {
 			error("Is a directory");
 			return;
@@ -284,11 +290,7 @@ int main(int argc, char** argv) {
 					}
 				}
 			}
-			if (recursive && force) {
-				removeRecursive(path);
-			} else {
-				remove(filename, path);
-			}
+            remove(filename, path);
 		} catch (fs::filesystem_error& err) {
 			const auto code = err.code();
 			// --force should ignore non-existant files
