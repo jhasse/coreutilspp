@@ -10,8 +10,11 @@ target_link_libraries(rm++ PRIVATE ThreadPool)
 
 target_compile_features(rm++ PUBLIC cxx_std_17)
 target_include_directories(rm++ PRIVATE subprojects/Lyra/include)
+if(WIN32)
+	target_compile_definitions(rm++ PRIVATE UNICODE)
+endif()
 
-add_executable(touch src/touch/touch.cpp)
+add_executable(touch src/touch/touch.cpp windows/default.manifest)
 target_compile_features(touch PUBLIC cxx_std_17)
 target_include_directories(touch PRIVATE subprojects/Lyra/include)
 
