@@ -64,6 +64,7 @@ void remove(const std::string& filename, fs::path path) {
 void removeRecursive(fs::path path) {
 	std::atomic_uint64_t deletedFiles = 0;
 	std::atomic_uint64_t filesToDelete = 0;
+    bool hasPrinted = false;
 
 	std::string error;
 	std::mutex errorMutex;
@@ -77,6 +78,7 @@ void removeRecursive(fs::path path) {
 			std::unique_lock cvLock(requestStopMutex);
 			requestStopCV.wait_for(cvLock, std::chrono::milliseconds(10));
 			if (filesToDelete > 0) {
+                hasPrinted = true;
 				std::cout << "\r" << "(" << deletedFiles
 						  << " / " << filesToDelete << ") ... "
 							<< std::flush;
@@ -136,6 +138,9 @@ void removeRecursive(fs::path path) {
 
 	uiThread.join();
 	if (error.empty()) {
+		if (hasPrinted) {
+			std::cout << "\33[2K\r" << std::flush;
+		}
 		fs::remove_all(path); // remove empty directories
 	} else {
 		std::cerr << "\nCouldn't delete " << error << std::endl;
