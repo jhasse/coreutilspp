@@ -64,7 +64,7 @@ void remove(const std::string& filename, fs::path path) {
 void removeRecursive(fs::path path) {
 	std::atomic_uint64_t deletedFiles = 0;
 	std::atomic_uint64_t filesToDelete = 0;
-    bool hasPrinted = false;
+	bool hasPrinted = false;
 
 	std::string error;
 	std::mutex errorMutex;
@@ -78,13 +78,13 @@ void removeRecursive(fs::path path) {
 			std::unique_lock cvLock(requestStopMutex);
 			requestStopCV.wait_for(cvLock, std::chrono::milliseconds(10));
 			if (filesToDelete > 0) {
-                hasPrinted = true;
-				std::cout << "\r" << "(" << deletedFiles
-						  << " / " << filesToDelete << ") ... "
-							<< std::flush;
-				if (requestStop) {
-					std::cout << (deletedFiles * 100 / filesToDelete) << "%";
+				hasPrinted = true;
+				std::cout << "\r"
+				          << "(" << deletedFiles << " / " << filesToDelete << ") ... ";
+				if (!requestStop) {
+					std::cout << "~";
 				}
+				std::cout << (deletedFiles * 100 / filesToDelete) << "% " << std::flush;
 			}
 		}
 	});
@@ -295,7 +295,7 @@ int main(int argc, char** argv) {
 					}
 				}
 			}
-            remove(filename, path);
+			remove(filename, path);
 		} catch (fs::filesystem_error& err) {
 			const auto code = err.code();
 			// --force should ignore non-existant files
