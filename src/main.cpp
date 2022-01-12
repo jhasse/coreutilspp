@@ -37,13 +37,13 @@ void remove(const std::string& filename, fs::path path) {
 	};
 	if (!fs::is_symlink(path) && fs::is_directory(path)) {
 		if (recursive) {
-            if (force) {
+			if (force) {
 				removeRecursive(path);
-            } else {
-                for (auto& child : fs::directory_iterator(path)) {
-                    remove(fs::relative(child.path()).string(), child.path());
-                }
-            }
+			} else {
+				for (auto& child : fs::directory_iterator(path)) {
+					remove(fs::relative(child.path()).string(), child.path());
+				}
+			}
 		} else {
 			error("Is a directory");
 			return;
@@ -93,9 +93,6 @@ void removeRecursive(fs::path path) {
 		ThreadPool pool(std::thread::hardware_concurrency());
 
 		for (auto& it : fs::recursive_directory_iterator(path)) {
-			if (fs::is_directory(it)) {
-				continue;
-			}
 			if (requestStop) {
 				break;
 			}
@@ -115,11 +112,12 @@ void removeRecursive(fs::path path) {
 						// https://github.com/ninja-build/ninja/issues/1886
 						SetFileAttributes(path.c_str(), attributes & ~FILE_ATTRIBUTE_READONLY);
 					}
-					if (!DeleteFile(path.c_str())) {
+					if (!DeleteFile(path.c_str()) && !fs::is_directory(it)) {
 						throw std::exception();
 					}
 #else
-					if (!fs::remove(it)) {
+					// directories will be removed at the end using remove_all
+					if (!fs::is_directory(it) && !fs::remove(it)) {
 						throw std::runtime_error("files doesn't exist");
 					}
 #endif
