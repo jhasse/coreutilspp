@@ -18,8 +18,13 @@ add_executable(touch src/touch/touch.cpp windows/default.manifest)
 target_compile_features(touch PUBLIC cxx_std_17)
 target_include_directories(touch PRIVATE subprojects/Lyra/include)
 
+add_executable(ls src/ls/ls.cpp windows/default.manifest)
+target_compile_features(ls PUBLIC cxx_std_17)
+target_include_directories(ls PRIVATE subprojects/Lyra/include)
+
 if(NOT MSVC)
 	target_link_libraries(rm++ PRIVATE stdc++fs)
 	target_link_libraries(touch PRIVATE stdc++fs)
+	target_link_libraries(ls PRIVATE stdc++fs)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
 endif()
