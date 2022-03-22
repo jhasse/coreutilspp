@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 	}
 	if (version) {
 		std::cout << binaryName
-		          << " 0.1\nCopyright � 2022 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
+		          << " 0.1\nCopyright © 2022 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
 		             "or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you "
 		             "are free to change and redistribute it.\nThere is NO WARRANTY, to the extent "
 		             "permitted by law.\n";
