@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 	}
 	if (version) {
 		std::cout << binaryName
-		          << " 0.1\nCopyright © 2022 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
+		          << " 0.1\nCopyright ï¿½ 2022 Jan Niklas Hasse\nLicense GPLv3+: GNU GPL version 3 "
 		             "or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you "
 		             "are free to change and redistribute it.\nThere is NO WARRANTY, to the extent "
 		             "permitted by law.\n";
@@ -67,11 +67,16 @@ int main(int argc, char** argv) {
 
 	int maxWidth = 0;
 	std::vector<Entry> files;
-	for (const auto& file : fs::directory_iterator(path)) {
-		files.emplace_back(Entry{ file.path().filename().u8string(), file.is_directory() });
-		if (files.back().name.size() /* TODO: UTF-8 */ > maxWidth) {
-			maxWidth = files.back().name.size();
+	try {
+		for (const auto& file : fs::directory_iterator(path)) {
+			files.emplace_back(Entry{ file.path().filename().u8string(), file.is_directory() });
+			if (files.back().name.size() /* TODO: UTF-8 */ > maxWidth) {
+				maxWidth = files.back().name.size();
+			}
 		}
+	} catch (fs::filesystem_error& e) {
+		std::cerr << binaryName << ": cannot access " << path << ": "<< e.code().message() << std::endl;
+		return e.code().value();
 	}
 
 	maxWidth += 2; // two spaces between columns
