@@ -14,6 +14,10 @@ if(WIN32)
 	target_compile_definitions(rm++ PRIVATE UNICODE)
 endif()
 
+add_executable(cat src/cat/cat.cpp windows/default.manifest)
+target_compile_features(cat PUBLIC cxx_std_17)
+target_include_directories(cat PRIVATE subprojects/Lyra/include)
+
 add_executable(touch src/touch/touch.cpp windows/default.manifest)
 target_compile_features(touch PUBLIC cxx_std_17)
 target_include_directories(touch PRIVATE subprojects/Lyra/include)
