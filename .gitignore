@@ -7,3 +7,4 @@
 /.cache/
 /out/
 /.vs/
+/CMakeSettings.json
