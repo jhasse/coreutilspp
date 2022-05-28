@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
 	// accidental `rm++ -rf *` in big directories.
 	if (mayPrompt() && files.size() > 3) {
 		size_t numberOfFolders = 0;
-		for (const auto filename : files) {
+		for (const auto& filename : files) {
 			if (fs::is_directory(filename)) {
 				++numberOfFolders;
 			}
