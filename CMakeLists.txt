@@ -26,6 +26,10 @@ add_executable(ls src/ls/ls.cpp windows/default.manifest)
 target_compile_features(ls PUBLIC cxx_std_17)
 target_include_directories(ls PRIVATE subprojects/Lyra/include)
 
+add_executable(env src/env/env.cpp windows/default.manifest)
+target_compile_features(env PUBLIC cxx_std_17)
+target_include_directories(env PRIVATE subprojects/Lyra/include)
+
 if(NOT MSVC)
 	target_link_libraries(rm PRIVATE stdc++fs)
 	target_link_libraries(touch PRIVATE stdc++fs)

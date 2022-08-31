@@ -8,6 +8,12 @@ Reimplementation of some of the GNU Coreutils in C++, useful to be used in Windo
 $ cat README.md
 ```
 
+## env
+
+```
+$ env -C /tmp ls
+```
+
 ## ls
 
 ```
