@@ -1,17 +1,17 @@
 cmake_minimum_required (VERSION 3.8)
 
-project(rm++ LANGUAGES CXX)
+project(coreutilspp LANGUAGES CXX)
 
 add_subdirectory(subprojects/ThreadPool)
 
 file(GLOB SRC src/*.cpp)
-add_executable(rm++ ${SRC} windows/default.manifest)
-target_link_libraries(rm++ PRIVATE ThreadPool)
+add_executable(rm ${SRC} windows/default.manifest)
+target_link_libraries(rm PRIVATE ThreadPool)
 
-target_compile_features(rm++ PUBLIC cxx_std_17)
-target_include_directories(rm++ PRIVATE subprojects/Lyra/include)
+target_compile_features(rm PUBLIC cxx_std_17)
+target_include_directories(rm PRIVATE subprojects/Lyra/include)
 if(WIN32)
-	target_compile_definitions(rm++ PRIVATE UNICODE)
+	target_compile_definitions(rm PRIVATE UNICODE)
 endif()
 
 add_executable(cat src/cat/cat.cpp windows/default.manifest)
@@ -27,7 +27,7 @@ target_compile_features(ls PUBLIC cxx_std_17)
 target_include_directories(ls PRIVATE subprojects/Lyra/include)
 
 if(NOT MSVC)
-	target_link_libraries(rm++ PRIVATE stdc++fs)
+	target_link_libraries(rm PRIVATE stdc++fs)
 	target_link_libraries(touch PRIVATE stdc++fs)
 	target_link_libraries(ls PRIVATE stdc++fs)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
