@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 		for (const auto& file : fs::directory_iterator(path)) {
 			files.emplace_back(Entry{ file.path().filename().u8string(), file.is_directory() });
 			if (files.back().name.size() /* TODO: UTF-8 */ > maxWidth) {
-				maxWidth = files.back().name.size();
+				maxWidth = static_cast<int>(files.back().name.size());
 			}
 		}
 	} catch (fs::filesystem_error& e) {
