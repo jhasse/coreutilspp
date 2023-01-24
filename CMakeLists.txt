@@ -5,7 +5,7 @@ project(rm++ LANGUAGES CXX)
 add_subdirectory(subprojects/ThreadPool)
 
 file(GLOB SRC src/*.cpp)
-add_executable(rm++ ${SRC})
+add_executable(rm++ ${SRC} windows/default.manifest)
 target_link_libraries(rm++ PRIVATE ThreadPool)
 
 target_compile_features(rm++ PUBLIC cxx_std_17)
