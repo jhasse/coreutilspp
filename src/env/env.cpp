@@ -47,5 +47,5 @@ int main(int argc, char** argv) {
 	for (const auto& arg : command) {
 		tmp << arg << ' ';
 	}
-	system(tmp.str().c_str());
+	return system(tmp.str().c_str());
 }
