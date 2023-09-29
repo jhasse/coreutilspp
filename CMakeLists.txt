@@ -1,6 +1,15 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.15)
 
 project(coreutilspp LANGUAGES CXX)
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT lto_supported OUTPUT error)
+if(lto_supported)
+	message(STATUS "IPO / LTO enabled")
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+else()
+	message(STATUS "IPO / LTO not supported: <${error}>")
+endif()
 
 add_subdirectory(subprojects/ThreadPool)
 
