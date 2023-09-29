@@ -17,7 +17,7 @@ jobs:
         cmake -Bbuild -DCMAKE_BUILD_TYPE=MinSizeRel
         cmake --build build --config MinSizeRel --parallel
         mkdir dist
-        mv build/*.exe dist/
+        mv build/MinSizeRel/*.exe dist/
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
