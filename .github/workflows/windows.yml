@@ -1,0 +1,25 @@
+name: Windows
+
+on:
+- push
+- pull_request
+
+jobs:
+  msvc:
+    runs-on: windows-2022
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+    - name: Build
+      shell: bash
+      run: |
+        cmake -Bbuild -DCMAKE_BUILD_TYPE=MinSizeRel
+        cmake --build build --config MinSizeRel --parallel
+        mkdir dist
+        mv build/*.exe dist/
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Coreutils++ Windows
+        path: dist/
