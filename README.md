@@ -16,6 +16,8 @@ $ env -C /tmp ls
 
 ## ls
 
+Very basic, for a better alternative see [eza](https://github.com/eza-community/eza).
+
 ```
 $ ls
 .cache               .clang-format        .git                 .gitignore           .gitmodules
@@ -29,7 +31,7 @@ subprojects          windows
 Shows a progress indication and warns when you're trying to delete your `HOME` directory or your current working
 directory.
 
-For an even safer way to remove files, see [rip](https://github.com/nivekuil/rip).
+For an even safer way to remove files see [rip2](https://github.com/MilesCranmer/rip2).
 
 ## touch
 
