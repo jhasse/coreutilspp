@@ -19,7 +19,7 @@ jobs:
         mkdir dist
         mv build/MinSizeRel/*.exe dist/
     - name: Upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: Coreutils++ Windows
         path: dist/
