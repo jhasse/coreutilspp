@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
 
 	const auto result = cli.parse(lyra::args(argc, argv));
 	if (!result) {
-		std::cerr << binaryName << ": " << result.errorMessage() << "\nTry '" << binaryName
+		std::cerr << binaryName << ": " << result.message() << "\nTry '" << binaryName
 		          << " --help' for more information.\n";
 		return 1;
 	}
